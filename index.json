@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "built_at": "2026-10-08T15:20:45+00:00",
+  "built_at": "2026-10-08T16:21:14+00:00",
   "plugins": [
     {
       "id": "classification-kit",
@@ -81,56 +81,6 @@
         "Homepage": "https://github.com/vicentzamoras/dashai-echo-chat",
         "Issues": "https://github.com/vicentzamoras/dashai-echo-chat/issues"
       }
-    },
-    {
-      "id": "tsv-loader",
-      "source": "git",
-      "location": "https://github.com/vicentzamoras/tsv-loader-test",
-      "name": "TSV Loader",
-      "description": "Data loader for tab-separated (TSV) tabular files.",
-      "authors": [
-        {
-          "name": "Vicente Zamora",
-          "email": "",
-          "url": ""
-        }
-      ],
-      "components": [
-        "TSVDataLoader"
-      ],
-      "component_types": [
-        "DataLoader"
-      ],
-      "releases": [
-        {
-          "tag": "v0.0.6",
-          "version": "0.0.6",
-          "min_app_version": "0.9.0",
-          "trust_level": "github_attested",
-          "sha256": "92bc8b69752f3901ac16dfe153f72ebb561a089ec48f8435969888849df5ab61",
-          "published_at": "2026-10-01T22:55:46Z",
-          "dependencies": []
-        },
-        {
-          "tag": "v0.0.5",
-          "version": "0.0.5",
-          "min_app_version": "0.9.0",
-          "trust_level": "github_attested",
-          "sha256": "14195f2c6558c899f856d9fc4a7dc6f333770710c907809a7707a91b5b6647ad",
-          "published_at": "2026-09-30T16:26:27Z",
-          "dependencies": []
-        },
-        {
-          "tag": "v0.0.4",
-          "version": "1.0.0",
-          "min_app_version": "0.9.0",
-          "trust_level": "github_attested",
-          "sha256": "50ed26fda2dabc2f93e9bff61dfe082a78ba0ef9a3084ac5c3ba743ff211196a",
-          "published_at": "2026-09-30T16:21:00Z",
-          "dependencies": []
-        }
-      ],
-      "project_urls": {}
     }
   ],
   "removed": []
