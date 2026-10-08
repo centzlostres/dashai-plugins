@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "built_at": "2026-10-08T15:20:45+00:00",
+  "plugins": [
+    {
+      "id": "classification-kit",
+      "source": "git",
+      "location": "https://github.com/vicentzamoras/dashai-classification-kit",
+      "name": "Classification Kit",
+      "description": "A tabular classification task with its own loader, baseline model and metric.",
+      "authors": [
+        {
+          "name": "Vicente Zamora",
+          "email": "",
+          "url": "https://github.com/vicentzamoras"
+        }
+      ],
+      "components": [
+        "KitTabularClassificationTask",
+        "KitCSVDataLoader",
+        "KitDummyClassifier",
+        "KitAccuracy"
+      ],
+      "component_types": [
+        "Task",
+        "DataLoader",
+        "Model",
+        "Metric"
+      ],
+      "releases": [
+        {
+          "tag": "v1.0.0",
+          "version": "1.0.0",
+          "min_app_version": "0.10.0",
+          "trust_level": "github_source",
+          "sha256": "a3237add4214ee14863f633ba476ff70918eb4165735e7660943f7910adc6c2a",
+          "published_at": "2026-10-08T15:20:17Z",
+          "dependencies": []
+        }
+      ],
+      "project_urls": {
+        "Homepage": "https://github.com/vicentzamoras/dashai-classification-kit",
+        "Issues": "https://github.com/vicentzamoras/dashai-classification-kit/issues"
+      }
+    },
+    {
+      "id": "echo-chat",
+      "source": "git",
+      "location": "https://github.com/vicentzamoras/dashai-echo-chat",
+      "name": "Echo Chat",
+      "description": "A chat model that echoes your message, or tells a joke with /joke.",
+      "authors": [
+        {
+          "name": "Vicente Zamora",
+          "email": "",
+          "url": "https://github.com/vicentzamoras"
+        }
+      ],
+      "components": [
+        "EchoChatTask",
+        "EchoModel"
+      ],
+      "component_types": [
+        "GenerativeTask",
+        "GenerativeModel"
+      ],
+      "releases": [
+        {
+          "tag": "v1.0.0",
+          "version": "1.0.0",
+          "min_app_version": "0.10.0",
+          "trust_level": "github_attested",
+          "sha256": "cbe257c6d3c0eee95bd2c552d0f085306e25898f655728e247f1f2d5d2b7f32a",
+          "published_at": "2026-10-08T15:18:21Z",
+          "dependencies": [
+            "pyjokes>=0.6"
+          ]
+        }
+      ],
+      "project_urls": {
+        "Homepage": "https://github.com/vicentzamoras/dashai-echo-chat",
+        "Issues": "https://github.com/vicentzamoras/dashai-echo-chat/issues"
+      }
+    },
+    {
+      "id": "tsv-loader",
+      "source": "git",
+      "location": "https://github.com/vicentzamoras/tsv-loader-test",
+      "name": "TSV Loader",
+      "description": "Data loader for tab-separated (TSV) tabular files.",
+      "authors": [
+        {
+          "name": "Vicente Zamora",
+          "email": "",
+          "url": ""
+        }
+      ],
+      "components": [
+        "TSVDataLoader"
+      ],
+      "component_types": [
+        "DataLoader"
+      ],
+      "releases": [
+        {
+          "tag": "v0.0.6",
+          "version": "0.0.6",
+          "min_app_version": "0.9.0",
+          "trust_level": "github_attested",
+          "sha256": "92bc8b69752f3901ac16dfe153f72ebb561a089ec48f8435969888849df5ab61",
+          "published_at": "2026-10-01T22:55:46Z",
+          "dependencies": []
+        },
+        {
+          "tag": "v0.0.5",
+          "version": "0.0.5",
+          "min_app_version": "0.9.0",
+          "trust_level": "github_attested",
+          "sha256": "14195f2c6558c899f856d9fc4a7dc6f333770710c907809a7707a91b5b6647ad",
+          "published_at": "2026-09-30T16:26:27Z",
+          "dependencies": []
+        },
+        {
+          "tag": "v0.0.4",
+          "version": "1.0.0",
+          "min_app_version": "0.9.0",
+          "trust_level": "github_attested",
+          "sha256": "50ed26fda2dabc2f93e9bff61dfe082a78ba0ef9a3084ac5c3ba743ff211196a",
+          "published_at": "2026-09-30T16:21:00Z",
+          "dependencies": []
+        }
+      ],
+      "project_urls": {}
+    }
+  ],
+  "removed": []
+}

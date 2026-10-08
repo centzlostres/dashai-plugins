@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "removed.schema.json",
+  "title": "Plugins retirados de la tienda (removed.json)",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "repo",
+      "type",
+      "reason",
+      "date"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "repo": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?/[A-Za-z0-9._-]+$"
+      },
+      "type": {
+        "enum": [
+          "withdrawn",
+          "unmaintained",
+          "critical"
+        ]
+      },
+      "reason": {
+        "type": "string",
+        "minLength": 1
+      },
+      "date": {
+        "type": "string",
+        "format": "date"
+      },
+      "link": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      }
+    }
+  }
+}

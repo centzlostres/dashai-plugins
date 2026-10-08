@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "entry.schema.json",
+  "title": "Entrada de un plugin en la tienda de dashAI (plugins/<id>.json)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "repo"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Igual al nombre del archivo y al id del manifest.json del plugin"
+    },
+    "repo": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?/[A-Za-z0-9._-]+$",
+      "description": "dueño/nombre del repositorio en GitHub"
+    }
+  }
+}

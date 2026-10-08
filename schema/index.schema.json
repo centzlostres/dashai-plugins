@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "index.schema.json",
+  "title": "Índice de la tienda que lee dashAI (index.json, lo genera el bot)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "built_at",
+    "plugins",
+    "removed"
+  ],
+  "properties": {
+    "schema": {
+      "const": 1
+    },
+    "built_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "location",
+          "name",
+          "description",
+          "authors",
+          "components",
+          "component_types",
+          "releases",
+          "project_urls"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "source": {
+            "type": "string",
+            "description": "Un PluginSource de dashAI (hoy: git)"
+          },
+          "location": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "authors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "component_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "releases": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "tag",
+                "version",
+                "min_app_version",
+                "trust_level",
+                "sha256",
+                "published_at",
+                "dependencies"
+              ],
+              "properties": {
+                "tag": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "min_app_version": {
+                  "type": "string"
+                },
+                "trust_level": {
+                  "type": "string"
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "published_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "dependencies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "project_urls": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^https?://"
+            }
+          }
+        }
+      }
+    },
+    "removed": {
+      "$ref": "removed.schema.json"
+    }
+  }
+}
