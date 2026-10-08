@@ -1,0 +1,36 @@
+# Builds index.json and readmes/ (scripts/validate.py) after a merge, every
+# day (new releases need no PR) and on demand; commits only what changed.
+name: Build index
+
+on:
+  push:
+    branches: [main]
+    paths: ["plugins/**", "removed.json", "scripts/**"]
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-index
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/validate.py build
+      - name: Commit
+        run: |
+          git add index.json readmes
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update index.json"
+          git push

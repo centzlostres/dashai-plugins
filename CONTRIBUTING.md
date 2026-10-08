@@ -22,8 +22,9 @@
 
 - Tienes que ser el dueño del repositorio (o, si es de una organización, un miembro público).
 
-Un bot instala tu plugin con dashAI y comenta el resultado. Después una persona del equipo
-lo revisa. Las versiones nuevas no necesitan otro PR: el bot las recoge cada día.
+El check **Check** revisa tu entrada y tus releases; si falla, su resumen dice por qué.
+Después una persona del equipo revisa el PR y hace merge, y **Build index** publica tu plugin
+en `index.json`. Las versiones nuevas no necesitan otro PR: se recogen cada día.
 
 ## Retirar tu plugin
 

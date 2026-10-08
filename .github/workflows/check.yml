@@ -1,0 +1,47 @@
+# Checks a PR that adds or changes a plugin's entry (scripts/validate.py).
+name: Check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: The validator, from main (never the PR's own copy)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+      - name: The PR, merged into main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: pr
+          fetch-depth: 2
+      - name: Check
+        working-directory: pr
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          changed=$(git diff --name-only HEAD^1 HEAD)
+          other=$(echo "$changed" | grep -v -E '^(plugins/[a-z0-9-]+\.json|removed\.json)$' || true)
+          if [ -n "$other" ]; then
+            echo "A PR to the store only changes plugins/<id>.json (or removed.json). Also changed:"
+            echo "$other"
+            exit 1
+          fi
+          entries=$(git diff --name-only --diff-filter=AMR HEAD^1 HEAD -- plugins || true)
+          if [ -z "$entries" ]; then
+            echo "No entry added or changed: nothing to check."
+            exit 0
+          fi
+          if [ "$(echo "$entries" | wc -l)" -gt 1 ]; then
+            echo "One plugin per PR."
+            exit 1
+          fi
+          python3 ../base/scripts/validate.py check $entries
