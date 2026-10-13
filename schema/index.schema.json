@@ -33,7 +33,8 @@
           "components",
           "component_types",
           "releases",
-          "project_urls"
+          "project_urls",
+          "license"
         ],
         "properties": {
           "id": {
@@ -96,6 +97,7 @@
                 "min_app_version",
                 "trust_level",
                 "sha256",
+                "commit",
                 "published_at",
                 "dependencies"
               ],
@@ -125,6 +127,20 @@
                   "items": {
                     "type": "string"
                   }
+                },
+                "commit": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{40}$",
+                  "description": "El commit revisado: dashAI muestra el README de ahí"
+                },
+                "workflow": {
+                  "type": "string",
+                  "description": "Solo github_attested: el workflow que lo construyó"
+                },
+                "signed_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Solo github_attested"
                 }
               }
             }
@@ -135,6 +151,10 @@
               "type": "string",
               "pattern": "^https?://"
             }
+          },
+          "license": {
+            "type": "string",
+            "description": "SPDX del repositorio (GitHub)"
           }
         }
       }

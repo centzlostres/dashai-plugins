@@ -6,8 +6,9 @@
    `manifest.json` válido y una release de GitHub con un solo `.zip`, idealmente construido
    y atestado por un workflow.
 2. La `version` del manifiesto es igual al tag de la release (`v0.1.0` → `0.1.0`).
-3. El repositorio es público, tiene README y una licencia de esta lista: MIT, Apache 2.0,
-   BSD 2/3, GPLv3, LGPLv3, Unlicense.
+3. El repositorio es público, tiene una licencia de esta lista (MIT, Apache 2.0, BSD 2/3,
+   GPLv3, LGPLv3, Unlicense) y un `README.md` en la raíz, con ese nombre exacto, en el commit
+   de cada release: dashAI lo muestra en la tienda desde ahí.
 4. El `id` no contiene `dashai`.
 5. Lo probaste instalándolo en dashAI desde la URL de tu repositorio.
 

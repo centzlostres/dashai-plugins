@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "built_at": "2026-10-08T16:27:32+00:00",
+  "built_at": "2026-10-13T15:15:37+00:00",
   "plugins": [
     {
       "id": "classification-kit",
@@ -27,21 +27,23 @@
         "Model",
         "Metric"
       ],
+      "project_urls": {
+        "Homepage": "https://github.com/vicentzamoras/dashai-classification-kit",
+        "Issues": "https://github.com/vicentzamoras/dashai-classification-kit/issues"
+      },
+      "license": "MIT",
       "releases": [
         {
           "tag": "v1.0.0",
           "version": "1.0.0",
           "min_app_version": "0.10.0",
-          "trust_level": "github_source",
           "sha256": "a3237add4214ee14863f633ba476ff70918eb4165735e7660943f7910adc6c2a",
+          "trust_level": "github_source",
+          "commit": "4949553973376e659a69479ea2cb64355d79e7a4",
           "published_at": "2026-10-08T15:20:17Z",
           "dependencies": []
         }
-      ],
-      "project_urls": {
-        "Homepage": "https://github.com/vicentzamoras/dashai-classification-kit",
-        "Issues": "https://github.com/vicentzamoras/dashai-classification-kit/issues"
-      }
+      ]
     },
     {
       "id": "echo-chat",
@@ -64,23 +66,27 @@
         "GenerativeTask",
         "GenerativeModel"
       ],
+      "project_urls": {
+        "Homepage": "https://github.com/vicentzamoras/dashai-echo-chat",
+        "Issues": "https://github.com/vicentzamoras/dashai-echo-chat/issues"
+      },
+      "license": "MIT",
       "releases": [
         {
           "tag": "v1.0.0",
           "version": "1.0.0",
           "min_app_version": "0.10.0",
-          "trust_level": "github_attested",
           "sha256": "cbe257c6d3c0eee95bd2c552d0f085306e25898f655728e247f1f2d5d2b7f32a",
+          "trust_level": "github_attested",
+          "workflow": ".github/workflows/release.yaml",
+          "signed_at": "2026-10-08T15:18:18+00:00",
+          "commit": "796272d90f3eeacd37b001b3242e30141e6e28c1",
           "published_at": "2026-10-08T15:18:21Z",
           "dependencies": [
             "pyjokes>=0.6"
           ]
         }
-      ],
-      "project_urls": {
-        "Homepage": "https://github.com/vicentzamoras/dashai-echo-chat",
-        "Issues": "https://github.com/vicentzamoras/dashai-echo-chat/issues"
-      }
+      ]
     },
     {
       "id": "explainers-plus",
@@ -103,62 +109,25 @@
         "GlobalExplainer",
         "LocalExplainer"
       ],
+      "project_urls": {
+        "Homepage": "https://github.com/centzlostres/explainers-plus",
+        "Issues": "https://github.com/centzlostres/explainers-plus/issues"
+      },
+      "license": "MIT",
       "releases": [
         {
           "tag": "v1.0.0",
           "version": "1.0.0",
           "min_app_version": "0.10.0",
-          "trust_level": "github_attested",
           "sha256": "f7926b568b494aee98c3876cc62122f862096daeae53046077c3c2b2c2f24d68",
+          "trust_level": "github_attested",
+          "workflow": ".github/workflows/release.yaml",
+          "signed_at": "2026-10-08T16:05:32+00:00",
+          "commit": "70caee3f345f88ba77b48cd435032a758ddedcfc",
           "published_at": "2026-10-08T16:05:20Z",
           "dependencies": []
         }
-      ],
-      "project_urls": {
-        "Homepage": "https://github.com/centzlostres/explainers-plus",
-        "Issues": "https://github.com/centzlostres/explainers-plus/issues"
-      }
-    },
-    {
-      "id": "tsv-loader",
-      "source": "git",
-      "location": "https://github.com/vicentzamoras/tsv-loader-test",
-      "name": "TSV Loader",
-      "description": "Data loader for tab-separated (TSV) tabular files.",
-      "authors": [
-        {
-          "name": "Vicente Zamora",
-          "email": "",
-          "url": ""
-        }
-      ],
-      "components": [
-        "TSVDataLoader"
-      ],
-      "component_types": [
-        "DataLoader"
-      ],
-      "releases": [
-        {
-          "tag": "v0.0.6",
-          "version": "0.0.6",
-          "min_app_version": "0.9.0",
-          "trust_level": "github_attested",
-          "sha256": "92bc8b69752f3901ac16dfe153f72ebb561a089ec48f8435969888849df5ab61",
-          "published_at": "2026-10-01T22:55:46Z",
-          "dependencies": []
-        },
-        {
-          "tag": "v0.0.5",
-          "version": "0.0.5",
-          "min_app_version": "0.9.0",
-          "trust_level": "github_attested",
-          "sha256": "14195f2c6558c899f856d9fc4a7dc6f333770710c907809a7707a91b5b6647ad",
-          "published_at": "2026-09-30T16:26:27Z",
-          "dependencies": []
-        }
-      ],
-      "project_urls": {}
+      ]
     }
   ],
   "removed": []

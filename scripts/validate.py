@@ -2,7 +2,7 @@
 the plugin's files alone, and builds index.json.
 
     python scripts/validate.py check <plugins/x.json>...   # a PR (PR_AUTHOR)
-    python scripts/validate.py build                       # index.json, readmes/
+    python scripts/validate.py build [--full]              # index.json
 
 Checked here: the entry, the repo (public, not archived, license), its
 releases (one .zip/.tar.gz or the tag's source code, at most 200 MB, the
@@ -11,6 +11,10 @@ version equals the tag, component types, each class exists, read with ast).
 Not checked: what needs dashAI (name clashes with its components, pip
 resolving the dependencies with its own, loading the code). dashAI checks all
 of it again when installing: this only decides what the store lists.
+
+The build reuses a release already in index.json while its file (or, for
+source code, its commit) is the same: a daily build only reviews what is new.
+`--full` reviews everything again (weekly).
 
 Standard library and the `gh` CLI only; GITHUB_TOKEN raises GitHub's limit.
 """
@@ -102,6 +106,7 @@ def load_entry(path, removed):
 
 
 def check_repo(repo):
+    """Refuses a repo the store can't list; returns its license (SPDX id)."""
     try:
         data = api(f"repos/{repo}")
     except Invalid as error:
@@ -115,6 +120,7 @@ def check_repo(repo):
     spdx = (data.get("license") or {}).get("spdx_id")
     if spdx not in LICENSES:
         raise Invalid(f"{repo} has no allowed license (found {spdx}); allowed: {', '.join(sorted(LICENSES))}")
+    return spdx
 
 
 def releases(repo):
@@ -149,13 +155,54 @@ def extract(blob, name, into):
     raise Invalid(f"{name} has no manifest.json at its root")
 
 
-def fetch(repo, release, into):
-    """What dashAI would download for this release: (folder, sha256, level).
-    The sha256 is computed as dashAI does, so installing can compare it."""
-    tag = release["tag_name"]
+def release_file(release):
+    """The release's single .zip/.tar.gz, or None: dashAI then installs the
+    tag's source code."""
     assets = [a for a in release["assets"] if a["name"].lower().endswith((".zip", ".tar.gz"))]
-    if len(assets) == 1:
-        asset = assets[0]
+    return assets[0] if len(assets) == 1 else None
+
+
+def tag_commit(repo, tag):
+    return api(f"repos/{repo}/commits/{urllib.parse.quote(tag, safe='')}")["sha"]
+
+
+def utc(timestamp):
+    return datetime.fromisoformat(timestamp).astimezone(timezone.utc).isoformat(timespec="seconds")
+
+
+def attestation(file, repo, tag):
+    """What a valid attestation of ``file`` records (the commit the build ran
+    on, its workflow and when it was signed), or None if it has none. `gh`
+    checks the same as dashAI: this repo's GitHub Actions, at this tag."""
+    run = subprocess.run(
+        ["gh", "attestation", "verify", str(file), "--repo", repo,
+         "--source-ref", f"refs/tags/{tag}", "--format", "json"],
+        capture_output=True, text=True,
+    )
+    if run.returncode != 0:
+        return None
+    details = {"commit": None, "workflow": None, "signed_at": None}
+    try:  # verified: a detail it can't read is only left out
+        result = json.loads(run.stdout)[0]["verificationResult"]
+        build = result["statement"]["predicate"]["buildDefinition"]
+        details["workflow"] = build["externalParameters"]["workflow"]["path"]
+        details["commit"] = next(
+            (d["digest"]["gitCommit"] for d in build.get("resolvedDependencies", [])
+             if "gitCommit" in d.get("digest", {})), None)
+        details["signed_at"] = utc(result["verifiedTimestamps"][0]["timestamp"])
+    except (KeyError, IndexError, TypeError, ValueError):
+        pass
+    return details
+
+
+def fetch(repo, release, into):
+    """What dashAI would download for this release: its folder, and how the
+    index lists it (sha256, trust level, commit; an attestation's workflow and
+    signing time). The sha256 is computed as dashAI does, so installing can
+    compare it."""
+    tag = release["tag_name"]
+    asset = release_file(release)
+    if asset:
         if asset["size"] > MAX_BYTES:
             raise Invalid(f"{asset['name']} is larger than 200 MB")
         blob = get(asset["browser_download_url"])
@@ -164,18 +211,42 @@ def fetch(repo, release, into):
             raise Invalid(f"{asset['name']} does not match GitHub's digest")
         file = into / asset["name"]
         file.write_bytes(blob)
-        attested = subprocess.run(
-            ["gh", "attestation", "verify", str(file), "--repo", repo,
-             "--source-ref", f"refs/tags/{tag}"],
-            capture_output=True,
-        ).returncode == 0
-        folder = extract(blob, asset["name"].lower(), into / "plugin")
-        return folder, sha256, "github_attested" if attested else "github_asset"
+        attested = attestation(file, repo, tag)
+        listed = {"sha256": sha256, "trust_level": "github_asset"}
+        if attested:
+            listed.update(trust_level="github_attested", workflow=attested["workflow"],
+                          signed_at=attested["signed_at"])
+        listed["commit"] = (attested or {}).get("commit") or tag_commit(repo, tag)
+        return extract(blob, asset["name"].lower(), into / "plugin"), listed
     # No single file: the source code at the tag's commit (a tag can move).
-    commit = api(f"repos/{repo}/commits/{urllib.parse.quote(tag, safe='')}")["sha"]
+    commit = tag_commit(repo, tag)
     blob = get(f"https://codeload.github.com/{repo}/tar.gz/{commit}")
     sha256 = hashlib.sha256(gzip.decompress(blob)).hexdigest()  # the tar's, as dashAI
-    return extract(blob, "source.tar.gz", into / "plugin"), sha256, "github_source"
+    listed = {"sha256": sha256, "trust_level": "github_source", "commit": commit}
+    return extract(blob, "source.tar.gz", into / "plugin"), listed
+
+
+def has_readme(repo, commit):
+    """dashAI shows a store plugin's README from its repo at the reviewed
+    commit: README.md at the root, with this exact name (raw is case
+    sensitive)."""
+    try:
+        get(f"https://raw.githubusercontent.com/{repo}/{commit}/README.md")
+    except Invalid:
+        return False
+    return True
+
+
+def unchanged(repo, release, old):
+    """Whether ``old`` (this tag in the last index) still describes the
+    release: the same file (GitHub's digest) or, for source code, the same
+    commit."""
+    if not old or "commit" not in old:
+        return False
+    asset = release_file(release)
+    if asset:
+        return old["trust_level"] != "github_source" and asset.get("digest") == f"sha256:{old['sha256']}"
+    return old["trust_level"] == "github_source" and tag_commit(repo, release["tag_name"]) == old["commit"]
 
 
 def defines(folder, class_ref):
@@ -241,54 +312,80 @@ def check_manifest(folder, plugin_id, tag):
     return manifest
 
 
-def describe(entry, log):
-    """The entry as index.json lists it, with its README; None if no release
-    passes. ``log`` gets one line per release."""
-    repo = entry["repo"]
-    check_repo(repo)
-    passed = []
-    for release in releases(repo):
-        with tempfile.TemporaryDirectory() as tmp:
-            try:
-                folder, sha256, level = fetch(repo, release, Path(tmp))
-                manifest = check_manifest(folder, entry["id"], release["tag_name"])
-            except Invalid as error:
-                log(f"  {release['tag_name']}: {error}")
-                continue
-            readme = folder / "README.md"
-            readme = readme.read_text("utf-8", errors="replace") if readme.is_file() else None
-        log(f"  {release['tag_name']}: ok ({level})")
-        passed.append((release, manifest, sha256, level, readme))
-    if not passed:
-        return None, None
-    _, latest, _, _, readme = passed[0]
-    components = latest["components"]
+def plugin_fields(manifest):
+    """What the index lists about the plugin itself, from its newest release."""
+    components = manifest["components"]
     return {
-        "id": entry["id"],
-        "source": "git",
-        "location": f"https://github.com/{repo}",
-        "name": latest["name"],
-        "description": latest.get("description", ""),
+        "name": manifest["name"],
+        "description": manifest.get("description", ""),
         "authors": [
             {key: str(author.get(key, "")) for key in ("name", "email", "url")}
-            for author in latest["authors"]
+            for author in manifest["authors"]
         ],
         "components": [c["class"].split(":")[1] for c in components],
         "component_types": [c["type"] for c in components],
-        "releases": [
-            {
-                "tag": release["tag_name"],
-                "version": manifest["version"],
-                "min_app_version": manifest["min_app_version"],
-                "trust_level": level,
-                "sha256": sha256,
-                "published_at": release["published_at"],
-                "dependencies": manifest.get("dependencies", []),
-            }
-            for release, manifest, sha256, level, _ in passed
-        ],
-        "project_urls": latest.get("project_urls", {}),
-    }, readme
+        "project_urls": manifest.get("project_urls", {}),
+    }
+
+
+PLUGIN_FIELDS = ("name", "description", "authors", "components", "component_types", "project_urls")
+
+
+def review(repo, release, plugin_id):
+    """(how the index lists the release, the plugin's fields from it)."""
+    tag = release["tag_name"]
+    with tempfile.TemporaryDirectory() as tmp:
+        folder, listed = fetch(repo, release, Path(tmp))
+        manifest = check_manifest(folder, plugin_id, tag)
+    if not has_readme(repo, listed["commit"]):
+        raise Invalid(f"no README.md at the repo's root in {listed['commit'][:7]}")
+    listed = {
+        "tag": tag,
+        "version": manifest["version"],
+        "min_app_version": manifest["min_app_version"],
+        **listed,
+        "published_at": release["published_at"],
+        "dependencies": manifest.get("dependencies", []),
+    }
+    return {k: v for k, v in listed.items() if v is not None}, plugin_fields(manifest)
+
+
+def describe(entry, log, known=None):
+    """The entry as index.json lists it; None if no release passes. ``known``:
+    its entry in the last index, whose unchanged releases are reused. ``log``
+    gets one line per release."""
+    repo = entry["repo"]
+    license_id = check_repo(repo)
+    location = f"https://github.com/{repo}"
+    if known and known.get("location") != location:
+        known = None  # another repo now: nothing to reuse
+    old = {r["tag"]: r for r in (known or {}).get("releases", [])}
+    passed = []  # (listed release, the plugin's fields from it; None if reused)
+    for release in releases(repo):
+        tag = release["tag_name"]
+        if unchanged(repo, release, old.get(tag)):
+            log(f"  {tag}: ok, unchanged ({old[tag]['trust_level']})")
+            passed.append((old[tag], None))
+            continue
+        try:
+            listed, fields = review(repo, release, entry["id"])
+        except Invalid as error:
+            log(f"  {tag}: {error}")
+            continue
+        log(f"  {tag}: ok ({listed['trust_level']})")
+        passed.append((listed, fields))
+    if not passed:
+        return None
+    # The newest release's fields; reused, it was the newest one before too.
+    fields = passed[0][1] or {key: known[key] for key in PLUGIN_FIELDS}
+    return {
+        "id": entry["id"],
+        "source": "git",
+        "location": location,
+        **fields,
+        "license": license_id,
+        "releases": [listed for listed, _ in passed],
+    }
 
 
 def removed_ids():
@@ -317,7 +414,7 @@ def check(paths):
             repos = [json.loads(p.read_text("utf-8"))["repo"].lower() for p in entries() if p.name != Path(path).name]
             if entry["repo"].lower() in repos:
                 raise Invalid(f"{entry['repo']} is already in the store")
-            listed, _ = describe(entry, lines.append)
+            listed = describe(entry, lines.append)
             if listed is None:
                 raise Invalid("no release passes")
             taken = {c: p["id"] for p in others if p["id"] != entry["id"] for c in p["components"]}
@@ -338,19 +435,20 @@ def check(paths):
     return 1 if failed else 0
 
 
-def build():
-    """index.json and readmes/ from every entry. A plugin that can't be read
-    now (GitHub down, rate limit) keeps what the index had."""
+def build(full=False):
+    """index.json from every entry. A plugin that can't be read now (GitHub
+    down, rate limit) keeps what the index had. ``built_at`` is when it was
+    last reviewed, so the file changes (and is committed) every day."""
     path = ROOT / "index.json"
     old = json.loads(path.read_text("utf-8")) if path.is_file() else {"plugins": []}
     kept = {p["id"]: p for p in old["plugins"]}
     removed = json.loads((ROOT / "removed.json").read_text("utf-8"))
-    plugins, readmes = [], {}
+    plugins = []
     for entry_path in entries():
         print(entry_path.name)
         try:
             entry = load_entry(entry_path, {item["id"] for item in removed})
-            listed, readme = describe(entry, print)
+            listed = describe(entry, print, None if full else kept.get(entry["id"]))
         except Invalid as error:
             print(f"  left out: {error}")
             continue
@@ -363,11 +461,6 @@ def build():
             print("  left out: no release passes")
             continue
         plugins.append(listed)
-        if readme:
-            readmes[listed["id"]] = readme
-    if plugins == old["plugins"] and removed == old.get("removed"):
-        print("index.json: no changes")
-        return 0
     index = {
         "schema": 1,
         "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -375,18 +468,10 @@ def build():
         "removed": removed,
     }
     path.write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n", "utf-8", newline="\n")
-    folder = ROOT / "readmes"
-    folder.mkdir(exist_ok=True)
-    listed_ids = {p["id"] for p in plugins}
-    for stale in folder.glob("*.md"):
-        if stale.stem not in listed_ids:
-            stale.unlink()
-    for plugin_id, text in readmes.items():
-        (folder / f"{plugin_id}.md").write_text(text, "utf-8", newline="\n")
     print(f"index.json: {len(plugins)} plugins")
     return 0
 
 
 if __name__ == "__main__":
     command, *args = sys.argv[1:] or ["build"]
-    sys.exit(check(args) if command == "check" else build())
+    sys.exit(check(args) if command == "check" else build(full="--full" in args))
