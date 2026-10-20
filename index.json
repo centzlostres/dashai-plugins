@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "built_at": "2026-10-20T15:08:03+00:00",
+  "built_at": "2026-10-20T15:24:59+00:00",
   "plugins": [
     {
       "id": "classification-kit",
@@ -85,6 +85,67 @@
           "dependencies": [
             "pyjokes>=0.6"
           ]
+        }
+      ]
+    },
+    {
+      "id": "tsv-loader",
+      "source": "git",
+      "location": "https://github.com/centzlostres/tsv-loader",
+      "name": "TSV Loader",
+      "description": "Data loader for tab-separated (TSV) tabular files.",
+      "authors": [
+        {
+          "name": "Jane Doe",
+          "email": "",
+          "url": "https://github.com/centzlostres"
+        },
+        {
+          "name": "Test Author Two",
+          "email": "author.two@example.org",
+          "url": ""
+        },
+        {
+          "name": "Test Author Three",
+          "email": "",
+          "url": "https://example.org"
+        }
+      ],
+      "components": [
+        "TSVDataLoader"
+      ],
+      "component_types": [
+        "DataLoader"
+      ],
+      "project_urls": {
+        "Homepage": "https://github.com/centzlostres/tsv-loader-test",
+        "Issues": "https://github.com/centzlostres/tsv-loader-test/issues"
+      },
+      "license": "MIT",
+      "releases": [
+        {
+          "tag": "v1.0.2",
+          "version": "1.0.2",
+          "min_app_version": "0.9.0",
+          "sha256": "68cad029acbb06708e5921c496d4f19e5515e8a5cd1f9a9932b7b6a227001617",
+          "trust_level": "github_attested",
+          "workflow": ".github/workflows/release.yaml",
+          "signed_at": "2026-10-20T15:16:11+00:00",
+          "commit": "98cff2861490480e500ac0aac639509229ca1656",
+          "published_at": "2026-10-20T15:15:56Z",
+          "dependencies": []
+        },
+        {
+          "tag": "v1.0.1",
+          "version": "1.0.1",
+          "min_app_version": "0.9.0",
+          "sha256": "1ee265b3ebf2b261608e0185d04e2c5694230305f3e3c6c3b7731adfa20445a4",
+          "trust_level": "github_attested",
+          "workflow": ".github/workflows/release.yaml",
+          "signed_at": "2026-10-20T15:14:32+00:00",
+          "commit": "0420eeb0e969ca2aed8d9be7dfab5202fb6270eb",
+          "published_at": "2026-10-20T15:14:21Z",
+          "dependencies": []
         }
       ]
     }
